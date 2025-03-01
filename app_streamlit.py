@@ -76,7 +76,7 @@ def get_available_models():
     except:
         return []
 
-def chat_with_ollama(message, model):
+def chat_with_ollama(): # message, model
     """Send a message to Ollama and get the response"""
     try:
         response = requests.post(
@@ -145,6 +145,8 @@ for message in st.session_state.messages:
             </div>
             """, unsafe_allow_html=True)
 
+
+
 # Chat input
 if st.session_state.selected_model:
     with st.form(key='chat_form'):
@@ -157,7 +159,7 @@ if st.session_state.selected_model:
             
             # Get AI response
             with st.spinner("AI is thinking..."):
-                ai_response = chat_with_ollama(user_input, st.session_state.selected_model)
+                ai_response = chat_with_ollama() # user_input, st.session_state.selected_model
                 
             # Add AI response to chat history
             st.session_state.messages.append({"role": "assistant", "content": ai_response})
