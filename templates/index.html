@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ollama Chat</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        #chat {
+            border: 1px solid #ccc;
+            padding: 10px;
+            height: 400px;
+            overflow-y: scroll;
+            margin-bottom: 10px;
+        }
+        .message {
+            margin-bottom: 10px;
+        }
+        .user {
+            color: blue;
+            font-weight: bold;
+        }
+        .bot {
+            color: green;
+            font-weight: bold;
+        }
+        textarea {
+            width: 100%;
+            max-width: 500px;
+            height: 100px;
+            margin-top: 10px;
+        }
+        button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Ollama Chat</h1>
+    <div id="chat">
+        <!-- Les messages de chat seront ajoutés ici -->
+    </div>
+
+    <form id="chatForm">
+        <label for="model">Select Model:</label><br>
+        <select id="model" name="model">
+            <option value="">-- Select a Model --</option>
+            <!-- Les modèles seront ajoutés ici dynamiquement -->
+        </select><br><br>
+
+        <label for="prompt">Enter Message:</label><br>
+        <textarea id="prompt" name="prompt" rows="4" cols="50" placeholder="Type your message here..."></textarea><br><br>
+        <button type="submit">Send</button>
+    </form>
+
+    <script>
+        // Charger les modèles au démarrage
+        fetch('/models')
+            .then(response => response.json())
+            .then(models => {
+                const modelSelect = document.getElementById('model');
+                models.forEach(model => {
+                    const option = document.createElement('option');
+                    option.value = model.name;
+                    option.textContent = model.name;
+                    modelSelect.appendChild(option);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching models:', error);
+            });
+
+        // Gérer la soumission du formulaire
+        document.getElementById('chatForm').addEventListener('submit', function(event) {
+            event.preventDefault();  // Empêcher le rechargement de la page
+
+            const prompt = document.getElementById('prompt').value;
+            const model = document.getElementById('model').value;
+
+            if (!prompt || !model) {
+                alert('Please select a model and enter a message.');
+                return;
+            }
+
+            // Ajouter le message de l'utilisateur au chat
+            const chat = document.getElementById('chat');
+            const userMessage = document.createElement('div');
+            userMessage.className = 'message user';
+            userMessage.textContent = `You: ${prompt}`;
+            chat.appendChild(userMessage);
+
+            // Envoyer la requête au backend
+            fetch('/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ prompt: prompt, model: model }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                // Ajouter la réponse du bot au chat
+                const botMessage = document.createElement('div');
+                botMessage.className = 'message bot';
+                botMessage.textContent = `Bot: ${data.response}`;
+                chat.appendChild(botMessage);
+
+                // Faire défiler la zone de chat vers le bas
+                chat.scrollTop = chat.scrollHeight;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to generate response. Please try again.');
+            });
+
+            // Effacer le champ de texte
+            document.getElementById('prompt').value = '';
+        });
+    </script>
+</body>
+</html>
