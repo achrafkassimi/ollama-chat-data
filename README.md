@@ -35,6 +35,10 @@ pip install -r requirements.txt
 ```bash
 streamlit run app_streamlit.py
 ```
+or
+```bash
+streamlit run app_streamlit.py --server.address=127.0.0.1 --server.enableCORS=false --server.enableXsrfProtection=false
+```
 
 ---
 
