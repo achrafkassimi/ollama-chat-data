@@ -76,20 +76,53 @@ def get_available_models():
     except:
         return []
 
-def chat_with_ollama(): # message, model
-    """Send a message to Ollama and get the response"""
+# def chat_with_ollama(): # message, model
+#     """Send a message to Ollama and get the response"""
+#     try:
+#         response = requests.post(
+#             'http://localhost:11434/api/generate',
+#             json={
+#                 "model": st.session_state.selected_model,
+#                 "prompt": format_chat_history(), # Send full conversation history
+#                 "stream": False
+#             }
+#         )
+#         if response.status_code == 200:
+#             return response.json().get('response', 'No response from the model.')
+#         return "Error: Unable to get response from the model."
+#     except Exception as e:
+#         return f"Error: {str(e)}"
+
+def chat_with_ollama():
+    """Send chat history to Ollama and stream responses correctly."""
     try:
         response = requests.post(
             'http://localhost:11434/api/generate',
             json={
                 "model": st.session_state.selected_model,
-                "prompt": format_chat_history(), # Send full conversation history
-                "stream": False
-            }
+                "prompt": format_chat_history(),
+                "stream": True  # ✅ Enable streaming
+            },
+            stream=True  # ✅ Stream response as it's generated
         )
+
+        response_text = ""  # ✅ Stores full response
+        message_placeholder = st.empty()  # ✅ Creates an empty space to update text dynamically
+
+        # ✅ Correctly process each JSON chunk
         if response.status_code == 200:
-            return response.json().get('response', 'No response from the model.')
-        return "Error: Unable to get response from the model."
+            for line in response.iter_lines():
+                if line:
+                    try:
+                        data = json.loads(line)  # Parse JSON
+                        response_text += data.get("response", "")  # Extract text
+
+                        # ✅ Update the placeholder dynamically (no duplication)
+                        message_placeholder.markdown(f"**AI:** {response_text}")
+                    except json.JSONDecodeError:
+                        continue  # Ignore malformed JSON chunks
+
+        return response_text  # Return full response after streaming
     except Exception as e:
         return f"Error: {str(e)}"
 
