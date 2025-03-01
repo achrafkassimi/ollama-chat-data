@@ -113,4 +113,5 @@ streamlit run app_streamlit.py
 ---
 
 **🚀 Enjoy chatting with Ollama AI!**
-
+https://dev.to/ajmal_hasan/setting-up-ollama-running-deepseek-r1-locally-for-a-powerful-rag-system-4pd4
+https://dev.to/pavanbelagatti/hugging-face-101-a-tutorial-for-absolute-beginners-3b0l
