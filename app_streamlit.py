@@ -93,6 +93,11 @@ def get_available_models():
 #     except Exception as e:
 #         return f"Error: {str(e)}"
 
+# 🔥 Why This Works
+# ✅ Shorter responses → Faster processing
+# ✅ Avoids unnecessary long answers
+# ✅ Speeds up inference time
+
 def chat_with_ollama():
     """Send chat history to Ollama and stream responses correctly."""
     try:
